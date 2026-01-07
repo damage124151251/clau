@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLAU - Democratic AI Treasury</title>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <style>
+        :root {
+            --claude-orange: #CC785C;
+            --claude-cream: #F4EDE4;
+            --claude-dark: #1A1716;
+            --claude-brown: #5C4940;
+            --claude-light-orange: #E6A88C;
+            --success: #2ECC71;
+            --warning: #F39C12;
+            --danger: #E74C3C;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Newsreader', serif;
+            background: var(--claude-cream);
+            color: var(--claude-dark);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(204, 120, 92, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(230, 168, 140, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 3rem 4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3rem 0;
+            margin-bottom: 4rem;
+            border-bottom: 3px solid var(--claude-orange);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--claude-orange);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--claude-cream);
+            box-shadow: 0 8px 30px rgba(204, 120, 92, 0.3);
+        }
+
+        .logo-text h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.2rem;
+        }
+
+        .logo-text p {
+            font-size: 1rem;
+            color: var(--claude-brown);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .wallet-btn {
+            background: var(--claude-orange);
+            color: var(--claude-cream);
+            border: none;
+            padding: 1.2rem 2.5rem;
+            border-radius: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 25px rgba(204, 120, 92, 0.25);
+        }
+
+        .wallet-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 35px rgba(204, 120, 92, 0.4);
+        }
+
+        .wallet-btn.connected {
+            background: var(--success);
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        /* Timer Section - Full Width */
+        .timer-section {
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: 24px;
+            padding: 4rem;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.06);
+            border: 3px solid var(--claude-orange);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timer-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--claude-orange), var(--claude-light-orange));
+            animation: progress 600s linear infinite;
+        }
+
+        @keyframes progress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+
+        .timer-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            color: var(--claude-brown);
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-weight: 600;
+        }
+
+        .timer-display {
+            font-size: 7rem;
+            font-weight: 700;
+            color: var(--claude-orange);
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 6px 25px rgba(204, 120, 92, 0.2);
+            line-height: 1;
+        }
+
+        .timer-status {
+            font-size: 1.4rem;
+            color: var(--claude-dark);
+            margin-bottom: 2.5rem;
+            font-weight: 400;
+        }
+
+        .treasury-display {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--claude-cream);
+            padding: 1.5rem 3rem;
+            border-radius: 14px;
+            border: 2px solid var(--claude-orange);
+        }
+
+        .treasury-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            color: var(--claude-brown);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .treasury-amount {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--claude-orange);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 18px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid var(--claude-orange);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: var(--claude-brown);
+            margin-bottom: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--claude-dark);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* AI Recommendation Card */
+        .ai-card {
+            background: linear-gradient(135deg, var(--claude-orange), var(--claude-light-orange));
+            border-radius: 24px;
+            padding: 3.5rem;
+            color: white;
+            box-shadow: 0 15px 50px rgba(204, 120, 92, 0.35);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .ai-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 0.5rem 1.2rem;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 2rem;
+        }
+
+        .ai-recommendation {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2rem;
+            border-radius: 14px;
+            margin: 2rem 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .ai-recommendation h3 {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .ai-reason {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            opacity: 0.95;
+        }
+
+        .ai-reason strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        /* Voting Card */
+        .voting-card {
+            background: white;
+            border-radius: 24px;
+            padding: 3.5rem;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.06);
+        }
+
+        .voting-card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--claude-dark);
+            font-weight: 600;
+        }
+
+        .voting-subtitle {
+            font-size: 1.05rem;
+            color: var(--claude-brown);
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+
+        .vote-option {
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border-radius: 14px;
+            background: var(--claude-cream);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vote-option:hover:not(.selected) {
+            border-color: var(--claude-light-orange);
+            transform: scale(1.02);
+        }
+
+        .vote-option.winning {
+            border-color: var(--claude-orange);
+            box-shadow: 0 8px 30px rgba(204, 120, 92, 0.25);
+        }
+
+        .vote-option.selected {
+            background: var(--claude-orange);
+            color: white;
+            border-color: var(--claude-orange);
+        }
+
+        .vote-option.selected .vote-info p,
+        .vote-option.selected .vote-percentage {
+            color: white;
+            opacity: 0.95;
+        }
+
+        .vote-progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: var(--claude-light-orange);
+            opacity: 0.15;
+            transition: width 0.5s ease;
+            z-index: 0;
+        }
+
+        .vote-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .vote-info h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.01em;
+        }
+
+        .vote-info p {
+            font-size: 1rem;
+            opacity: 0.75;
+            line-height: 1.5;
+        }
+
+        .vote-percentage {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--claude-orange);
+        }
+
+        .vote-option.selected .vote-percentage {
+            color: white;
+        }
+
+        .vote-button {
+            width: 100%;
+            padding: 1.8rem;
+            background: var(--claude-orange);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 2rem;
+            transition: all 0.3s ease;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .vote-button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 35px rgba(204, 120, 92, 0.4);
+        }
+
+        .vote-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Transaction Log */
+        .log-section {
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: 24px;
+            padding: 3.5rem;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.06);
+        }
+
+        .log-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 3rem;
+            color: var(--claude-dark);
+            font-weight: 600;
+        }
+
+        .log-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem;
+            border-bottom: 2px solid var(--claude-cream);
+            transition: all 0.3s ease;
+        }
+
+        .log-entry:hover {
+            background: var(--claude-cream);
+            transform: translateX(5px);
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .log-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: var(--claude-cream);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: var(--claude-orange);
+        }
+
+        .log-details h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .log-details p {
+            font-size: 0.95rem;
+            color: var(--claude-brown);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .log-amount {
+            text-align: right;
+        }
+
+        .log-amount .amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--claude-orange);
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 0.3rem;
+        }
+
+        .log-amount .time {
+            font-size: 0.9rem;
+            color: var(--claude-brown);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem;
+            color: var(--claude-brown);
+            font-size: 1.1rem;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: white;
+            padding: 1.5rem 2.5rem;
+            border-radius: 14px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            border-left: 5px solid var(--success);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            display: none;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .timer-display {
+                font-size: 5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .timer-display {
+                font-size: 4rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">CL</div>
+                <div class="logo-text">
+                    <h1>CLAU</h1>
+                    <p>Democratic AI Treasury</p>
+                </div>
+            </div>
+            <button class="wallet-btn" id="walletBtn" onclick="connectWallet()">
+                Connect Wallet
+            </button>
+        </header>
+
+        <div class="main-layout">
+            <!-- Timer Section -->
+            <div class="timer-section">
+                <div class="timer-label">Next Execution In</div>
+                <div class="timer-display" id="timer">10:00</div>
+                <div class="timer-status" id="timerStatus">Voting in progress</div>
+                <div class="treasury-display">
+                    <span class="treasury-label">Treasury Available</span>
+                    <span class="treasury-amount" id="treasuryAmount">-- SOL</span>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Holders</div>
+                    <div class="stat-value" id="totalHolders">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Votes This Cycle</div>
+                    <div class="stat-value" id="totalVotes">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Completed Cycles</div>
+                    <div class="stat-value" id="totalCycles">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">24h Volume</div>
+                    <div class="stat-value" id="volume24h">--</div>
+                </div>
+            </div>
+
+            <!-- AI Recommendation -->
+            <div class="ai-card">
+                <div class="ai-badge">Claude AI Analysis</div>
+                <h2>Recommended Action</h2>
+                <div class="ai-recommendation">
+                    <h3>BUYBACK</h3>
+                </div>
+                <div class="ai-reason">
+                    <strong>Market Analysis</strong>
+                    Volume growing 45% in the last 2 hours with positive momentum. Buyback at this moment creates additional buying pressure and maximizes price impact. Current market cap shows ideal conditions for strategic token repurchase.
+                </div>
+            </div>
+
+            <!-- Voting Card -->
+            <div class="voting-card">
+                <h2>Cast Your Vote</h2>
+                <p class="voting-subtitle">Select an action for the treasury. The option with most votes will be executed automatically when the timer reaches zero.</p>
+                
+                <div class="vote-option" data-option="burn" onclick="selectVote('burn')">
+                    <div class="vote-progress" style="width: 0%"></div>
+                    <div class="vote-header">
+                        <div class="vote-info">
+                            <h3>Burn Tokens</h3>
+                            <p>Permanently remove tokens from circulation to increase scarcity</p>
+                        </div>
+                        <div class="vote-percentage">0%</div>
+                    </div>
+                </div>
+
+                <div class="vote-option" data-option="buyback" onclick="selectVote('buyback')">
+                    <div class="vote-progress" style="width: 0%"></div>
+                    <div class="vote-header">
+                        <div class="vote-info">
+                            <h3>Token Buyback</h3>
+                            <p>Purchase tokens from market to create buying pressure</p>
+                        </div>
+                        <div class="vote-percentage">0%</div>
+                    </div>
+                </div>
+
+                <div class="vote-option" data-option="distribute" onclick="selectVote('distribute')">
+                    <div class="vote-progress" style="width: 0%"></div>
+                    <div class="vote-header">
+                        <div class="vote-info">
+                            <h3>Distribute Rewards</h3>
+                            <p>Share SOL proportionally among all qualifying holders</p>
+                        </div>
+                        <div class="vote-percentage">0%</div>
+                    </div>
+                </div>
+
+                <div class="vote-option" data-option="hold" onclick="selectVote('hold')">
+                    <div class="vote-progress" style="width: 0%"></div>
+                    <div class="vote-header">
+                        <div class="vote-info">
+                            <h3>Accumulate</h3>
+                            <p>Save treasury for next cycle to multiply impact</p>
+                        </div>
+                        <div class="vote-percentage">0%</div>
+                    </div>
+                </div>
+
+                <button class="vote-button" id="voteBtn" onclick="submitVote()" disabled>
+                    Connect wallet to vote
+                </button>
+            </div>
+
+            <!-- Transaction Log -->
+            <div class="log-section">
+                <h2>Transaction History</h2>
+                <div id="transactionLog">
+                    <div class="empty-state">
+                        <p>No transactions yet. Executed actions will appear here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <strong>Success!</strong>
+    </div>
+
+    <script>
+        // State
+        let walletConnected = false;
+        let walletAddress = null;
+        let selectedOption = null;
+        let hasVoted = false;
+        let timeLeft = 600; // 10 minutes
+
+        // Vote tracking
+        let voteCount = {
+            burn: 0,
+            buyback: 0,
+            distribute: 0,
+            hold: 0
+        };
+
+        // Start timer immediately
+        const timerInterval = setInterval(updateTimer, 1000);
+
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft > 120) {
+                document.getElementById('timerStatus').textContent = 'Voting in progress';
+            } else if (timeLeft > 0) {
+                document.getElementById('timerStatus').textContent = 'Final minutes to vote';
+            } else {
+                document.getElementById('timerStatus').textContent = 'Executing winning action...';
+            }
+
+            if (timeLeft > 0) {
+                timeLeft--;
+            } else {
+                executeVote();
+                resetCycle();
+            }
+        }
+
+        function resetCycle() {
+            timeLeft = 600;
+            hasVoted = false;
+            selectedOption = null;
+            
+            document.querySelectorAll('.vote-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            updateVoteButton();
+            voteCount = { burn: 0, buyback: 0, distribute: 0, hold: 0 };
+            updateVotePercentages();
+        }
+
+        // Connect to Phantom Wallet
+        async function connectWallet() {
+            const btn = document.getElementById('walletBtn');
+            
+            if (walletConnected) {
+                walletConnected = false;
+                walletAddress = null;
+                btn.textContent = 'Connect Wallet';
+                btn.classList.remove('connected');
+                updateVoteButton();
+                return;
+            }
+
+            if (!window.solana || !window.solana.isPhantom) {
+                alert('Please install Phantom wallet from phantom.app');
+                window.open('https://phantom.app/', '_blank');
+                return;
+            }
+
+            try {
+                btn.innerHTML = '<span class="loading"></span> Connecting...';
+                
+                const resp = await window.solana.connect();
+                walletAddress = resp.publicKey.toString();
+                
+                walletConnected = true;
+                btn.textContent = walletAddress.substring(0, 4) + '...' + walletAddress.substring(walletAddress.length - 4);
+                btn.classList.add('connected');
+                
+                updateVoteButton();
+                showNotification('Wallet connected successfully');
+                
+            } catch (err) {
+                console.error('Wallet connection error:', err);
+                btn.textContent = 'Connect Wallet';
+                showNotification('Failed to connect wallet');
+            }
+        }
+
+        // Vote selection
+        function selectVote(option) {
+            if (!walletConnected || hasVoted) return;
+
+            document.querySelectorAll('.vote-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            const selectedElement = document.querySelector(`[data-option="${option}"]`);
+            selectedElement.classList.add('selected');
+            selectedOption = option;
+            
+            updateVoteButton();
+        }
+
+        // Submit vote
+        async function submitVote() {
+            if (!selectedOption || hasVoted || !walletConnected) return;
+
+            const btn = document.getElementById('voteBtn');
+            btn.innerHTML = '<span class="loading"></span> Recording vote...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                hasVoted = true;
+                voteCount[selectedOption]++;
+                
+                updateVotePercentages();
+                showNotification('Vote recorded successfully');
+                updateVoteButton();
+            }, 2000);
+        }
+
+        // Update vote button state
+        function updateVoteButton() {
+            const btn = document.getElementById('voteBtn');
+            
+            if (!walletConnected) {
+                btn.textContent = 'Connect wallet to vote';
+                btn.disabled = true;
+            } else if (hasVoted) {
+                btn.textContent = 'Vote recorded - Wait for next cycle';
+                btn.disabled = true;
+            } else if (selectedOption) {
+                btn.textContent = 'Confirm Vote';
+                btn.disabled = false;
+            } else {
+                btn.textContent = 'Select an option above';
+                btn.disabled = true;
+            }
+        }
+
+        // Update vote percentages
+        function updateVotePercentages() {
+            const total = Object.values(voteCount).reduce((a, b) => a + b, 0);
+            
+            if (total === 0) {
+                Object.keys(voteCount).forEach(key => {
+                    const element = document.querySelector(`[data-option="${key}"]`);
+                    element.querySelector('.vote-percentage').textContent = '0%';
+                    element.querySelector('.vote-progress').style.width = '0%';
+                    element.classList.remove('winning');
+                });
+                return;
+            }
+
+            let maxVotes = 0;
+            let winningOption = null;
+
+            Object.keys(voteCount).forEach(key => {
+                const votes = voteCount[key];
+                const percent = Math.round((votes / total) * 100);
+                const element = document.querySelector(`[data-option="${key}"]`);
+                
+                element.querySelector('.vote-percentage').textContent = `${percent}%`;
+                element.querySelector('.vote-progress').style.width = `${percent}%`;
+                element.classList.remove('winning');
+
+                if (votes > maxVotes) {
+                    maxVotes = votes;
+                    winningOption = key;
+                }
+            });
+
+            if (winningOption) {
+                const winElement = document.querySelector(`[data-option="${winningOption}"]`);
+                winElement.classList.add('winning');
+            }
+        }
+
+        // Execute winning vote action
+        function executeVote() {
+            const total = Object.values(voteCount).reduce((a, b) => a + b, 0);
+            if (total === 0) return;
+
+            let maxVotes = 0;
+            let winningOption = null;
+            Object.keys(voteCount).forEach(key => {
+                if (voteCount[key] > maxVotes) {
+                    maxVotes = voteCount[key];
+                    winningOption = key;
+                }
+            });
+
+            if (!winningOption) return;
+
+            showNotification(`Executing ${winningOption.toUpperCase()}`);
+            addTransaction(winningOption);
+        }
+
+        // Add transaction to log
+        function addTransaction(action) {
+            const logContainer = document.getElementById('transactionLog');
+            
+            if (logContainer.querySelector('.empty-state')) {
+                logContainer.innerHTML = '';
+            }
+
+            const actionMap = {
+                burn: { label: 'BURN', title: 'Token Burn Executed' },
+                buyback: { label: 'BUY', title: 'Buyback Executed' },
+                distribute: { label: 'DIST', title: 'Distribution Executed' },
+                hold: { label: 'HOLD', title: 'Treasury Accumulated' }
+            };
+
+            const info = actionMap[action];
+            const txHash = generateTxHash();
+            
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `
+                <div class="log-info">
+                    <div class="log-icon">${info.label}</div>
+                    <div class="log-details">
+                        <h4>${info.title}</h4>
+                        <p>Tx: ${txHash}</p>
+                    </div>
+                </div>
+                <div class="log-amount">
+                    <div class="amount">-- SOL</div>
+                    <div class="time">Just now</div>
+                </div>
+            `;
+            
+            logContainer.insertBefore(entry, logContainer.firstChild);
+        }
+
+        // Generate transaction hash
+        function generateTxHash() {
+            const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+            let hash = '';
+            for (let i = 0; i < 4; i++) {
+                hash += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            hash += '...';
+            for (let i = 0; i < 4; i++) {
+                hash += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return hash;
+        }
+
+        // Show notification
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.innerHTML = `<strong>${message}</strong>`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Check Phantom on load
+        window.addEventListener('load', () => {
+            if (window.solana && window.solana.isPhantom) {
+                console.log('Phantom wallet detected');
+            }
+        });
+    </script>
+</body>
+</html>
