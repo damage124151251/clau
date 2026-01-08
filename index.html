@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CLAU - Democratic AI Treasury</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="logo.png">
+    
     <link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     
     <!-- Supabase CDN -->
@@ -17,8 +21,6 @@
             --claude-brown: #5C4940;
             --claude-light-orange: #E6A88C;
             --success: #2ECC71;
-            --warning: #F39C12;
-            --danger: #E74C3C;
         }
 
         * {
@@ -56,18 +58,20 @@
         }
 
         .logo-icon {
-            width: 60px;
-            height: 60px;
-            background: var(--claude-orange);
-            border-radius: 14px;
+            width: 70px;
+            height: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700;
-            font-size: 1.8rem;
-            color: var(--claude-cream);
+            border-radius: 50%;
+            overflow: hidden;
             box-shadow: 0 8px 30px rgba(204, 120, 92, 0.3);
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .logo-text h1 {
@@ -79,6 +83,36 @@
             font-size: 1rem;
             color: var(--claude-brown);
             font-family: 'JetBrains Mono', monospace;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .x-btn {
+            background: #000;
+            color: white;
+            border: none;
+            padding: 1.2rem 1.5rem;
+            border-radius: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .x-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.3);
+            background: #1a1a1a;
         }
 
         .wallet-btn {
@@ -282,19 +316,36 @@
             .main-layout { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
+
+        @media (max-width: 768px) {
+            .header-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            .x-btn, .wallet-btn {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <div class="logo">
-                <div class="logo-icon">CL</div>
+                <div class="logo-icon">
+                    <img src="logo.png" alt="CLAU Logo">
+                </div>
                 <div class="logo-text">
                     <h1>CLAU</h1>
                     <p>Democratic AI Treasury</p>
                 </div>
             </div>
-            <button class="wallet-btn" id="walletBtn">Connect Wallet</button>
+            <div class="header-actions">
+                <a href="https://x.com/ClauAISol" target="_blank" class="x-btn" title="Follow us on X">
+                    𝕏
+                </a>
+                <button class="wallet-btn" id="walletBtn">Connect Wallet</button>
+            </div>
         </header>
 
         <div class="main-layout">
@@ -372,13 +423,11 @@
         const SUPABASE_URL = 'https://kqrymgipyoefvijwlssy.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxcnltZ2lweW9lZnZpandsc3N5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4MjY2MzEsImV4cCI6MjA4MzQwMjYzMX0.EN8rnm_AdIkqNuGQ1P8eQpRfAGuGIxPyD6aWEtNG5O0';
 
-        // Initialize Supabase
         const { createClient } = supabase;
         const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
         console.log('✅ Supabase initialized');
 
-        // State
         let walletConnected = false;
         let walletAddress = null;
         let selectedOption = null;
@@ -392,7 +441,6 @@
             const btn = document.getElementById('walletBtn');
             
             if (walletConnected) {
-                // Disconnect
                 walletConnected = false;
                 walletAddress = null;
                 btn.textContent = 'Connect Wallet';
@@ -401,7 +449,6 @@
                 return;
             }
 
-            // Check for Phantom
             if (!window.solana || !window.solana.isPhantom) {
                 showNotification('Please install Phantom wallet!');
                 window.open('https://phantom.app/', '_blank');
@@ -434,7 +481,6 @@
         // SUPABASE REAL-TIME SYNC
         // ═══════════════════════════════════════════════════════════
         
-        // Subscribe to changes
         db.channel('bot_state_changes')
             .on('postgres_changes', 
                 { event: 'UPDATE', schema: 'public', table: 'bot_state' },
@@ -445,7 +491,6 @@
             )
             .subscribe();
 
-        // Load initial state
         async function loadState() {
             try {
                 const { data, error } = await db
@@ -465,15 +510,12 @@
             }
         }
 
-        // Update UI from Supabase data
         function updateUI(data) {
-            // Timer
             const minutes = Math.floor(data.time_remaining / 60);
             const seconds = data.time_remaining % 60;
             document.getElementById('timer').textContent = 
                 `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
-            // Status
             if (data.time_remaining > 120) {
                 document.getElementById('timerStatus').textContent = 'Voting in progress';
             } else if (data.time_remaining > 0) {
@@ -482,7 +524,6 @@
                 document.getElementById('timerStatus').textContent = 'Executing...';
             }
 
-            // Stats
             const totalVotes = (data.votes_burn || 0) + (data.votes_buyback || 0) + 
                              (data.votes_distribute || 0) + (data.votes_hold || 0);
             
@@ -491,7 +532,6 @@
             document.getElementById('treasury').textContent = data.treasury || '0 SOL';
             document.getElementById('claimedFees').textContent = data.claimed_fees || '0 SOL';
 
-            // Votes
             updateVoteDisplay(data);
         }
 
@@ -538,18 +578,15 @@
             btn.disabled = true;
 
             try {
-                // Get current votes
                 const { data: currentData } = await db
                     .from('bot_state')
                     .select('*')
                     .eq('id', 1)
                     .single();
 
-                // Increment vote
                 const voteField = `votes_${selectedOption}`;
                 const newCount = (currentData[voteField] || 0) + 1;
 
-                // Update Supabase
                 const { error } = await db
                     .from('bot_state')
                     .update({ [voteField]: newCount })
@@ -602,7 +639,6 @@
             }, 3000);
         }
 
-        // Reset vote on new cycle
         let lastCycle = 0;
         setInterval(async () => {
             const { data } = await db
