@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CLAU - Democratic AI Treasury</title>
     <link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
+    
     <style>
         :root {
             --claude-orange: #CC785C;
@@ -28,33 +31,15 @@
             font-family: 'Newsreader', serif;
             background: var(--claude-cream);
             color: var(--claude-dark);
-            overflow-x: hidden;
             line-height: 1.6;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(204, 120, 92, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(230, 168, 140, 0.08) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0;
         }
 
         .container {
             max-width: 1600px;
             margin: 0 auto;
             padding: 3rem 4rem;
-            position: relative;
-            z-index: 1;
         }
 
-        /* Header */
         header {
             display: flex;
             justify-content: space-between;
@@ -88,8 +73,6 @@
         .logo-text h1 {
             font-size: 2.5rem;
             font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 0.2rem;
         }
 
         .logo-text p {
@@ -121,15 +104,12 @@
             background: var(--success);
         }
 
-        /* Main Layout */
         .main-layout {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 3rem;
-            margin-bottom: 4rem;
         }
 
-        /* Timer Section - Full Width */
         .timer-section {
             grid-column: 1 / -1;
             background: white;
@@ -138,34 +118,6 @@
             box-shadow: 0 15px 50px rgba(0, 0, 0, 0.06);
             border: 3px solid var(--claude-orange);
             text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .timer-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 6px;
-            background: linear-gradient(90deg, var(--claude-orange), var(--claude-light-orange));
-            animation: progress 600s linear infinite;
-        }
-
-        @keyframes progress {
-            from { width: 100%; }
-            to { width: 0%; }
-        }
-
-        .timer-label {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.95rem;
-            color: var(--claude-brown);
-            margin-bottom: 1.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            font-weight: 600;
         }
 
         .timer-display {
@@ -173,45 +125,14 @@
             font-weight: 700;
             color: var(--claude-orange);
             font-family: 'JetBrains Mono', monospace;
-            margin-bottom: 1.5rem;
-            text-shadow: 0 6px 25px rgba(204, 120, 92, 0.2);
-            line-height: 1;
+            margin: 1.5rem 0;
         }
 
         .timer-status {
             font-size: 1.4rem;
-            color: var(--claude-dark);
             margin-bottom: 2.5rem;
-            font-weight: 400;
         }
 
-        .treasury-display {
-            display: inline-flex;
-            align-items: center;
-            gap: 1rem;
-            background: var(--claude-cream);
-            padding: 1.5rem 3rem;
-            border-radius: 14px;
-            border: 2px solid var(--claude-orange);
-        }
-
-        .treasury-label {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1rem;
-            color: var(--claude-brown);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .treasury-amount {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--claude-orange);
-        }
-
-        /* Stats Grid */
         .stats-grid {
             grid-column: 1 / -1;
             display: grid;
@@ -226,11 +147,6 @@
             padding: 2.5rem;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
             border-left: 5px solid var(--claude-orange);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
         }
 
         .stat-label {
@@ -239,77 +155,14 @@
             margin-bottom: 0.8rem;
             font-family: 'JetBrains Mono', monospace;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: 600;
         }
 
         .stat-value {
             font-size: 2.5rem;
             font-weight: 700;
-            color: var(--claude-dark);
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* AI Recommendation Card */
-        .ai-card {
-            background: linear-gradient(135deg, var(--claude-orange), var(--claude-light-orange));
-            border-radius: 24px;
-            padding: 3.5rem;
-            color: white;
-            box-shadow: 0 15px 50px rgba(204, 120, 92, 0.35);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .ai-card h2 {
-            font-size: 1.8rem;
-            margin-bottom: 2rem;
-            font-weight: 600;
-            letter-spacing: -0.01em;
-        }
-
-        .ai-badge {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.25);
-            padding: 0.5rem 1.2rem;
-            border-radius: 8px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 2rem;
-        }
-
-        .ai-recommendation {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 2rem;
-            border-radius: 14px;
-            margin: 2rem 0;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .ai-recommendation h3 {
-            font-size: 2.2rem;
-            margin-bottom: 1rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        .ai-reason {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            opacity: 0.95;
-        }
-
-        .ai-reason strong {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-
-        /* Voting Card */
         .voting-card {
             background: white;
             border-radius: 24px;
@@ -319,21 +172,13 @@
 
         .voting-card h2 {
             font-size: 1.8rem;
-            margin-bottom: 1rem;
-            color: var(--claude-dark);
-            font-weight: 600;
-        }
-
-        .voting-subtitle {
-            font-size: 1.05rem;
-            color: var(--claude-brown);
             margin-bottom: 3rem;
-            line-height: 1.6;
         }
 
         .vote-option {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
             padding: 2rem;
             margin-bottom: 1.5rem;
             border-radius: 14px;
@@ -341,18 +186,11 @@
             cursor: pointer;
             transition: all 0.3s ease;
             border: 3px solid transparent;
-            position: relative;
-            overflow: hidden;
         }
 
-        .vote-option:hover:not(.selected) {
+        .vote-option:hover {
             border-color: var(--claude-light-orange);
             transform: scale(1.02);
-        }
-
-        .vote-option.winning {
-            border-color: var(--claude-orange);
-            box-shadow: 0 8px 30px rgba(204, 120, 92, 0.25);
         }
 
         .vote-option.selected {
@@ -361,43 +199,18 @@
             border-color: var(--claude-orange);
         }
 
-        .vote-option.selected .vote-info p,
         .vote-option.selected .vote-percentage {
             color: white;
-            opacity: 0.95;
-        }
-
-        .vote-progress {
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            background: var(--claude-light-orange);
-            opacity: 0.15;
-            transition: width 0.5s ease;
-            z-index: 0;
-        }
-
-        .vote-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            position: relative;
-            z-index: 1;
         }
 
         .vote-info h3 {
             font-size: 1.5rem;
-            font-weight: 700;
             margin-bottom: 0.5rem;
-            letter-spacing: -0.01em;
         }
 
         .vote-info p {
             font-size: 1rem;
             opacity: 0.75;
-            line-height: 1.5;
         }
 
         .vote-percentage {
@@ -405,10 +218,6 @@
             font-size: 2rem;
             font-weight: 700;
             color: var(--claude-orange);
-        }
-
-        .vote-option.selected .vote-percentage {
-            color: white;
         }
 
         .vote-button {
@@ -422,15 +231,8 @@
             font-weight: 600;
             cursor: pointer;
             margin-top: 2rem;
-            transition: all 0.3s ease;
             font-family: 'JetBrains Mono', monospace;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .vote-button:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 35px rgba(204, 120, 92, 0.4);
         }
 
         .vote-button:disabled {
@@ -438,98 +240,30 @@
             cursor: not-allowed;
         }
 
-        /* Transaction Log */
-        .log-section {
-            grid-column: 1 / -1;
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
             background: white;
-            border-radius: 24px;
-            padding: 3.5rem;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.06);
-        }
-
-        .log-section h2 {
-            font-size: 1.8rem;
-            margin-bottom: 3rem;
-            color: var(--claude-dark);
-            font-weight: 600;
-        }
-
-        .log-entry {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 2rem;
-            border-bottom: 2px solid var(--claude-cream);
-            transition: all 0.3s ease;
-        }
-
-        .log-entry:hover {
-            background: var(--claude-cream);
-            transform: translateX(5px);
-        }
-
-        .log-entry:last-child {
-            border-bottom: none;
-        }
-
-        .log-info {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .log-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            background: var(--claude-cream);
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700;
-            color: var(--claude-orange);
-        }
-
-        .log-details h4 {
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-
-        .log-details p {
-            font-size: 0.95rem;
-            color: var(--claude-brown);
+            padding: 1.5rem 2.5rem;
+            border-radius: 14px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            border-left: 5px solid var(--success);
+            z-index: 1000;
+            display: none;
             font-family: 'JetBrains Mono', monospace;
         }
 
-        .log-amount {
-            text-align: right;
+        .notification.show {
+            display: block;
+            animation: slideIn 0.3s ease;
         }
 
-        .log-amount .amount {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--claude-orange);
-            font-family: 'JetBrains Mono', monospace;
-            margin-bottom: 0.3rem;
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
-        .log-amount .time {
-            font-size: 0.9rem;
-            color: var(--claude-brown);
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 4rem;
-            color: var(--claude-brown);
-            font-size: 1.1rem;
-        }
-
-        /* Loading Animation */
         .loading {
             display: inline-block;
             width: 20px;
@@ -544,69 +278,9 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Notification */
-        .notification {
-            position: fixed;
-            top: 2rem;
-            right: 2rem;
-            background: white;
-            padding: 1.5rem 2.5rem;
-            border-radius: 14px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
-            border-left: 5px solid var(--success);
-            z-index: 1000;
-            animation: slideIn 0.3s ease;
-            display: none;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .notification.show {
-            display: block;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        /* Responsive */
         @media (max-width: 1200px) {
-            .main-layout {
-                grid-template-columns: 1fr;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .timer-display {
-                font-size: 5rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 2rem;
-            }
-
-            header {
-                flex-direction: column;
-                gap: 1.5rem;
-            }
-
-            .timer-display {
-                font-size: 4rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
+            .main-layout { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
@@ -620,186 +294,105 @@
                     <p>Democratic AI Treasury</p>
                 </div>
             </div>
-            <button class="wallet-btn" id="walletBtn" onclick="connectWallet()">
-                Connect Wallet
-            </button>
+            <button class="wallet-btn" id="walletBtn">Connect Wallet</button>
         </header>
 
         <div class="main-layout">
-            <!-- Timer Section -->
             <div class="timer-section">
-                <div class="timer-label">Next Execution In</div>
+                <div style="font-family: 'JetBrains Mono'; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 1rem;">Next Execution In</div>
                 <div class="timer-display" id="timer">10:00</div>
                 <div class="timer-status" id="timerStatus">Voting in progress</div>
-                <div class="treasury-display">
-                    <span class="treasury-label">Treasury Available</span>
-                    <span class="treasury-amount" id="treasuryAmount">-- SOL</span>
-                </div>
             </div>
 
-            <!-- Stats Grid -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-label">Total Holders</div>
-                    <div class="stat-value" id="totalHolders">--</div>
-                </div>
-                <div class="stat-card">
                     <div class="stat-label">Votes This Cycle</div>
-                    <div class="stat-value" id="totalVotes">--</div>
+                    <div class="stat-value" id="totalVotes">0</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Completed Cycles</div>
-                    <div class="stat-value" id="totalCycles">--</div>
+                    <div class="stat-value" id="totalCycles">0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">24h Volume</div>
-                    <div class="stat-value" id="volume24h">--</div>
+                    <div class="stat-label">Treasury</div>
+                    <div class="stat-value" id="treasury">0 SOL</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Claimed Fees</div>
+                    <div class="stat-value" id="claimedFees">0 SOL</div>
                 </div>
             </div>
 
-            <!-- AI Recommendation -->
-            <div class="ai-card">
-                <div class="ai-badge">Claude AI Analysis</div>
-                <h2>Recommended Action</h2>
-                <div class="ai-recommendation">
-                    <h3>BUYBACK</h3>
-                </div>
-                <div class="ai-reason">
-                    <strong>Market Analysis</strong>
-                    Volume growing 45% in the last 2 hours with positive momentum. Buyback at this moment creates additional buying pressure and maximizes price impact. Current market cap shows ideal conditions for strategic token repurchase.
-                </div>
-            </div>
-
-            <!-- Voting Card -->
-            <div class="voting-card">
+            <div class="voting-card" style="grid-column: 1 / -1;">
                 <h2>Cast Your Vote</h2>
-                <p class="voting-subtitle">Select an action for the treasury. The option with most votes will be executed automatically when the timer reaches zero.</p>
                 
-                <div class="vote-option" data-option="burn" onclick="selectVote('burn')">
-                    <div class="vote-progress" style="width: 0%"></div>
-                    <div class="vote-header">
-                        <div class="vote-info">
-                            <h3>Burn Tokens</h3>
-                            <p>Permanently remove tokens from circulation to increase scarcity</p>
-                        </div>
-                        <div class="vote-percentage">0%</div>
+                <div class="vote-option" data-option="burn">
+                    <div class="vote-info">
+                        <h3>🔥 Burn Tokens</h3>
+                        <p>Permanently remove tokens from circulation</p>
                     </div>
+                    <div class="vote-percentage" id="percent-burn">0%</div>
                 </div>
 
-                <div class="vote-option" data-option="buyback" onclick="selectVote('buyback')">
-                    <div class="vote-progress" style="width: 0%"></div>
-                    <div class="vote-header">
-                        <div class="vote-info">
-                            <h3>Token Buyback</h3>
-                            <p>Purchase tokens from market to create buying pressure</p>
-                        </div>
-                        <div class="vote-percentage">0%</div>
+                <div class="vote-option" data-option="buyback">
+                    <div class="vote-info">
+                        <h3>💎 Token Buyback</h3>
+                        <p>Purchase tokens from market</p>
                     </div>
+                    <div class="vote-percentage" id="percent-buyback">0%</div>
                 </div>
 
-                <div class="vote-option" data-option="distribute" onclick="selectVote('distribute')">
-                    <div class="vote-progress" style="width: 0%"></div>
-                    <div class="vote-header">
-                        <div class="vote-info">
-                            <h3>Distribute Rewards</h3>
-                            <p>Share SOL proportionally among all qualifying holders</p>
-                        </div>
-                        <div class="vote-percentage">0%</div>
+                <div class="vote-option" data-option="distribute">
+                    <div class="vote-info">
+                        <h3>🎁 Distribute Rewards</h3>
+                        <p>Share SOL among holders</p>
                     </div>
+                    <div class="vote-percentage" id="percent-distribute">0%</div>
                 </div>
 
-                <div class="vote-option" data-option="hold" onclick="selectVote('hold')">
-                    <div class="vote-progress" style="width: 0%"></div>
-                    <div class="vote-header">
-                        <div class="vote-info">
-                            <h3>Accumulate</h3>
-                            <p>Save treasury for next cycle to multiply impact</p>
-                        </div>
-                        <div class="vote-percentage">0%</div>
+                <div class="vote-option" data-option="hold">
+                    <div class="vote-info">
+                        <h3>💰 Accumulate</h3>
+                        <p>Save for next cycle</p>
                     </div>
+                    <div class="vote-percentage" id="percent-hold">0%</div>
                 </div>
 
-                <button class="vote-button" id="voteBtn" onclick="submitVote()" disabled>
-                    Connect wallet to vote
-                </button>
-            </div>
-
-            <!-- Transaction Log -->
-            <div class="log-section">
-                <h2>Transaction History</h2>
-                <div id="transactionLog">
-                    <div class="empty-state">
-                        <p>No transactions yet. Executed actions will appear here.</p>
-                    </div>
-                </div>
+                <button class="vote-button" id="voteBtn" disabled>Connect wallet to vote</button>
             </div>
         </div>
     </div>
 
-    <div class="notification" id="notification">
-        <strong>Success!</strong>
-    </div>
+    <div class="notification" id="notification"></div>
 
     <script>
+        // ═══════════════════════════════════════════════════════════
+        // CONFIGURATION
+        // ═══════════════════════════════════════════════════════════
+        const SUPABASE_URL = 'https://kqrymgipyoefvijwlssy.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxcnltZ2lweW9lZnZpandsc3N5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUyNTYyNjEsImV4cCI6MjA1MDgzMjI2MX0.JT-C2tQDdmWYJKIL5prJVw_Vgj9CetF';
+
+        // Initialize Supabase
+        const { createClient } = supabase;
+        const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        console.log('✅ Supabase initialized');
+
         // State
         let walletConnected = false;
         let walletAddress = null;
         let selectedOption = null;
         let hasVoted = false;
-        let timeLeft = 600; // 10 minutes
 
-        // Vote tracking
-        let voteCount = {
-            burn: 0,
-            buyback: 0,
-            distribute: 0,
-            hold: 0
-        };
-
-        // Start timer immediately
-        const timerInterval = setInterval(updateTimer, 1000);
-
-        function updateTimer() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            document.getElementById('timer').textContent = 
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            if (timeLeft > 120) {
-                document.getElementById('timerStatus').textContent = 'Voting in progress';
-            } else if (timeLeft > 0) {
-                document.getElementById('timerStatus').textContent = 'Final minutes to vote';
-            } else {
-                document.getElementById('timerStatus').textContent = 'Executing winning action...';
-            }
-
-            if (timeLeft > 0) {
-                timeLeft--;
-            } else {
-                executeVote();
-                resetCycle();
-            }
-        }
-
-        function resetCycle() {
-            timeLeft = 600;
-            hasVoted = false;
-            selectedOption = null;
-            
-            document.querySelectorAll('.vote-option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            
-            updateVoteButton();
-            voteCount = { burn: 0, buyback: 0, distribute: 0, hold: 0 };
-            updateVotePercentages();
-        }
-
-        // Connect to Phantom Wallet
-        async function connectWallet() {
+        // ═══════════════════════════════════════════════════════════
+        // WALLET CONNECTION
+        // ═══════════════════════════════════════════════════════════
+        
+        document.getElementById('walletBtn').addEventListener('click', async () => {
             const btn = document.getElementById('walletBtn');
             
             if (walletConnected) {
+                // Disconnect
                 walletConnected = false;
                 walletAddress = null;
                 btn.textContent = 'Connect Wallet';
@@ -808,8 +401,9 @@
                 return;
             }
 
+            // Check for Phantom
             if (!window.solana || !window.solana.isPhantom) {
-                alert('Please install Phantom wallet from phantom.app');
+                showNotification('Please install Phantom wallet!');
                 window.open('https://phantom.app/', '_blank');
                 return;
             }
@@ -825,26 +419,220 @@
                 btn.classList.add('connected');
                 
                 updateVoteButton();
-                showNotification('Wallet connected successfully');
+                showNotification('Wallet connected!');
+                
+                console.log('✅ Wallet connected:', walletAddress);
                 
             } catch (err) {
-                console.error('Wallet connection error:', err);
+                console.error('Wallet error:', err);
                 btn.textContent = 'Connect Wallet';
-                showNotification('Failed to connect wallet');
+                showNotification('Failed to connect');
+            }
+        });
+
+        // ═══════════════════════════════════════════════════════════
+        // SUPABASE REAL-TIME SYNC
+        // ═══════════════════════════════════════════════════════════
+        
+        // Subscribe to changes
+        db.channel('bot_state_changes')
+            .on('postgres_changes', 
+                { event: 'UPDATE', schema: 'public', table: 'bot_state' },
+                (payload) => {
+                    console.log('🔄 Bot state updated:', payload.new);
+                    updateUI(payload.new);
+                }
+            )
+            .subscribe();
+
+        // Load initial state
+        async function loadState() {
+            try {
+                const { data, error } = await db
+                    .from('bot_state')
+                    .select('*')
+                    .eq('id', 1)
+                    .single();
+
+                if (error) throw error;
+                
+                if (data) {
+                    console.log('📊 Initial state loaded:', data);
+                    updateUI(data);
+                }
+            } catch (error) {
+                console.error('Error loading state:', error);
             }
         }
 
-        // Vote selection
-        function selectVote(option) {
-            if (!walletConnected || hasVoted) return;
+        // Update UI from Supabase data
+        function updateUI(data) {
+            // Timer
+            const minutes = Math.floor(data.time_remaining / 60);
+            const seconds = data.time_remaining % 60;
+            document.getElementById('timer').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
-            document.querySelectorAll('.vote-option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
+            // Status
+            if (data.time_remaining > 120) {
+                document.getElementById('timerStatus').textContent = 'Voting in progress';
+            } else if (data.time_remaining > 0) {
+                document.getElementById('timerStatus').textContent = 'Final minutes!';
+            } else {
+                document.getElementById('timerStatus').textContent = 'Executing...';
+            }
 
-            const selectedElement = document.querySelector(`[data-option="${option}"]`);
-            selectedElement.classList.add('selected');
-            selectedOption = option;
+            // Stats
+            const totalVotes = (data.votes_burn || 0) + (data.votes_buyback || 0) + 
+                             (data.votes_distribute || 0) + (data.votes_hold || 0);
             
-            updateVoteButton();
+            document.getElementById('totalVotes').textContent = totalVotes;
+            document.getElementById('totalCycles').textContent = data.current_cycle || 0;
+            document.getElementById('treasury').textContent = data.treasury || '0 SOL';
+            document.getElementById('claimedFees').textContent = data.claimed_fees || '0 SOL';
+
+            // Votes
+            updateVoteDisplay(data);
         }
+
+        function updateVoteDisplay(data) {
+            const votes = {
+                burn: data.votes_burn || 0,
+                buyback: data.votes_buyback || 0,
+                distribute: data.votes_distribute || 0,
+                hold: data.votes_hold || 0
+            };
+
+            const total = Object.values(votes).reduce((a, b) => a + b, 0);
+
+            Object.entries(votes).forEach(([option, count]) => {
+                const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+                document.getElementById(`percent-${option}`).textContent = `${percent}%`;
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // VOTING
+        // ═══════════════════════════════════════════════════════════
+        
+        document.querySelectorAll('.vote-option').forEach(option => {
+            option.addEventListener('click', () => {
+                if (!walletConnected || hasVoted) return;
+
+                document.querySelectorAll('.vote-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+
+                option.classList.add('selected');
+                selectedOption = option.dataset.option;
+                
+                updateVoteButton();
+            });
+        });
+
+        document.getElementById('voteBtn').addEventListener('click', async () => {
+            if (!selectedOption || hasVoted || !walletConnected) return;
+
+            const btn = document.getElementById('voteBtn');
+            btn.innerHTML = '<span class="loading"></span> Recording...';
+            btn.disabled = true;
+
+            try {
+                // Get current votes
+                const { data: currentData } = await db
+                    .from('bot_state')
+                    .select('*')
+                    .eq('id', 1)
+                    .single();
+
+                // Increment vote
+                const voteField = `votes_${selectedOption}`;
+                const newCount = (currentData[voteField] || 0) + 1;
+
+                // Update Supabase
+                const { error } = await db
+                    .from('bot_state')
+                    .update({ [voteField]: newCount })
+                    .eq('id', 1);
+
+                if (error) throw error;
+
+                hasVoted = true;
+                showNotification('Vote recorded!');
+                updateVoteButton();
+
+                console.log('✅ Vote recorded:', selectedOption);
+
+            } catch (error) {
+                console.error('Vote error:', error);
+                showNotification('Failed to vote');
+                btn.disabled = false;
+            }
+        });
+
+        function updateVoteButton() {
+            const btn = document.getElementById('voteBtn');
+            
+            if (!walletConnected) {
+                btn.textContent = 'Connect wallet to vote';
+                btn.disabled = true;
+            } else if (hasVoted) {
+                btn.textContent = 'Vote recorded - Wait for next cycle';
+                btn.disabled = true;
+            } else if (selectedOption) {
+                btn.textContent = 'Confirm Vote';
+                btn.disabled = false;
+            } else {
+                btn.textContent = 'Select an option above';
+                btn.disabled = true;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // UTILITIES
+        // ═══════════════════════════════════════════════════════════
+        
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Reset vote on new cycle
+        let lastCycle = 0;
+        setInterval(async () => {
+            const { data } = await db
+                .from('bot_state')
+                .select('current_cycle')
+                .eq('id', 1)
+                .single();
+
+            if (data && data.current_cycle > lastCycle) {
+                lastCycle = data.current_cycle;
+                hasVoted = false;
+                selectedOption = null;
+                
+                document.querySelectorAll('.vote-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                updateVoteButton();
+                console.log('🔄 New cycle started');
+            }
+        }, 2000);
+
+        // ═══════════════════════════════════════════════════════════
+        // INITIALIZE
+        // ═══════════════════════════════════════════════════════════
+        
+        window.addEventListener('load', () => {
+            loadState();
+            console.log('🚀 CLAU loaded and synced!');
+        });
+    </script>
+</body>
+</html>
