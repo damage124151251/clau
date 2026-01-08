@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CLAU - Democratic AI Treasury</title>
     <link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Solana Web3 -->
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    
     <style>
         :root {
             --claude-orange: #CC785C;
@@ -129,7 +135,7 @@
             margin-bottom: 4rem;
         }
 
-        /* Timer Section - Full Width */
+        /* Timer Section */
         .timer-section {
             grid-column: 1 / -1;
             background: white;
@@ -150,12 +156,6 @@
             width: 100%;
             height: 6px;
             background: linear-gradient(90deg, var(--claude-orange), var(--claude-light-orange));
-            animation: progress 600s linear infinite;
-        }
-
-        @keyframes progress {
-            from { width: 100%; }
-            to { width: 0%; }
         }
 
         .timer-label {
@@ -257,15 +257,12 @@
             padding: 3.5rem;
             color: white;
             box-shadow: 0 15px 50px rgba(204, 120, 92, 0.35);
-            position: relative;
-            overflow: hidden;
         }
 
         .ai-card h2 {
             font-size: 1.8rem;
             margin-bottom: 2rem;
             font-weight: 600;
-            letter-spacing: -0.01em;
         }
 
         .ai-badge {
@@ -294,7 +291,6 @@
             font-size: 2.2rem;
             margin-bottom: 1rem;
             font-weight: 700;
-            letter-spacing: -0.02em;
         }
 
         .ai-reason {
@@ -382,7 +378,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
             position: relative;
             z-index: 1;
         }
@@ -391,7 +386,6 @@
             font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
-            letter-spacing: -0.01em;
         }
 
         .vote-info p {
@@ -529,7 +523,7 @@
             font-size: 1.1rem;
         }
 
-        /* Loading Animation */
+        /* Loading */
         .loading {
             display: inline-block;
             width: 20px;
@@ -576,7 +570,7 @@
         }
 
         /* Responsive */
-        @media (max-width: 1200px) {
+        @keyframes {
             .main-layout {
                 grid-template-columns: 1fr;
             }
@@ -633,7 +627,7 @@
                 <div class="timer-status" id="timerStatus">Voting in progress</div>
                 <div class="treasury-display">
                     <span class="treasury-label">Treasury Available</span>
-                    <span class="treasury-amount" id="treasuryAmount">-- SOL</span>
+                    <span class="treasury-amount" id="treasuryAmount">0 SOL</span>
                 </div>
             </div>
 
@@ -645,15 +639,15 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Votes This Cycle</div>
-                    <div class="stat-value" id="totalVotes">--</div>
+                    <div class="stat-value" id="totalVotes">0</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Completed Cycles</div>
-                    <div class="stat-value" id="totalCycles">--</div>
+                    <div class="stat-value" id="totalCycles">0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">24h Volume</div>
-                    <div class="stat-value" id="volume24h">--</div>
+                    <div class="stat-label">Claimed Fees</div>
+                    <div class="stat-value" id="claimedFees">0 SOL</div>
                 </div>
             </div>
 
@@ -676,46 +670,46 @@
                 <p class="voting-subtitle">Select an action for the treasury. The option with most votes will be executed automatically when the timer reaches zero.</p>
                 
                 <div class="vote-option" data-option="burn" onclick="selectVote('burn')">
-                    <div class="vote-progress" style="width: 0%"></div>
+                    <div class="vote-progress" id="progress-burn" style="width: 0%"></div>
                     <div class="vote-header">
                         <div class="vote-info">
                             <h3>Burn Tokens</h3>
                             <p>Permanently remove tokens from circulation to increase scarcity</p>
                         </div>
-                        <div class="vote-percentage">0%</div>
+                        <div class="vote-percentage" id="percent-burn">0%</div>
                     </div>
                 </div>
 
                 <div class="vote-option" data-option="buyback" onclick="selectVote('buyback')">
-                    <div class="vote-progress" style="width: 0%"></div>
+                    <div class="vote-progress" id="progress-buyback" style="width: 0%"></div>
                     <div class="vote-header">
                         <div class="vote-info">
                             <h3>Token Buyback</h3>
                             <p>Purchase tokens from market to create buying pressure</p>
                         </div>
-                        <div class="vote-percentage">0%</div>
+                        <div class="vote-percentage" id="percent-buyback">0%</div>
                     </div>
                 </div>
 
                 <div class="vote-option" data-option="distribute" onclick="selectVote('distribute')">
-                    <div class="vote-progress" style="width: 0%"></div>
+                    <div class="vote-progress" id="progress-distribute" style="width: 0%"></div>
                     <div class="vote-header">
                         <div class="vote-info">
                             <h3>Distribute Rewards</h3>
                             <p>Share SOL proportionally among all qualifying holders</p>
                         </div>
-                        <div class="vote-percentage">0%</div>
+                        <div class="vote-percentage" id="percent-distribute">0%</div>
                     </div>
                 </div>
 
                 <div class="vote-option" data-option="hold" onclick="selectVote('hold')">
-                    <div class="vote-progress" style="width: 0%"></div>
+                    <div class="vote-progress" id="progress-hold" style="width: 0%"></div>
                     <div class="vote-header">
                         <div class="vote-info">
                             <h3>Accumulate</h3>
                             <p>Save treasury for next cycle to multiply impact</p>
                         </div>
-                        <div class="vote-percentage">0%</div>
+                        <div class="vote-percentage" id="percent-hold">0%</div>
                     </div>
                 </div>
 
@@ -741,61 +735,167 @@
     </div>
 
     <script>
+        // ═══════════════════════════════════════════════════════════
+        // SUPABASE CONFIGURATION
+        // ═══════════════════════════════════════════════════════════
+        const SUPABASE_URL = 'https://kqrymgipyoefvijwlssy.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxcnltZ2lweW9lZnZpandsc3N5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUyNTYyNjEsImV4cCI6MjA1MDgzMjI2MX0.sb_publishable_JT-C2tQDdmWYJKIL5prJVw_Vgj9CetF';
+        
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         // State
         let walletConnected = false;
         let walletAddress = null;
         let selectedOption = null;
         let hasVoted = false;
-        let timeLeft = 600; // 10 minutes
 
-        // Vote tracking
-        let voteCount = {
-            burn: 0,
-            buyback: 0,
-            distribute: 0,
-            hold: 0
-        };
+        // ═══════════════════════════════════════════════════════════
+        // SUPABASE REAL-TIME SYNC
+        // ═══════════════════════════════════════════════════════════
+        
+        // Subscribe to bot_state changes
+        const subscription = supabase
+            .channel('bot_state_changes')
+            .on('postgres_changes', 
+                { event: 'UPDATE', schema: 'public', table: 'bot_state' },
+                (payload) => {
+                    console.log('Bot state updated:', payload.new);
+                    updateUIFromSupabase(payload.new);
+                }
+            )
+            .subscribe();
 
-        // Start timer immediately
-        const timerInterval = setInterval(updateTimer, 1000);
+        // Initial load
+        async function loadInitialState() {
+            const { data, error } = await supabase
+                .from('bot_state')
+                .select('*')
+                .eq('id', 1)
+                .single();
 
-        function updateTimer() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
+            if (data) {
+                updateUIFromSupabase(data);
+            }
+        }
+
+        // Update UI from Supabase data
+        function updateUIFromSupabase(data) {
+            // Timer
+            const minutes = Math.floor(data.time_remaining / 60);
+            const seconds = data.time_remaining % 60;
             document.getElementById('timer').textContent = 
                 `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            if (timeLeft > 120) {
+
+            // Status
+            if (data.time_remaining > 120) {
                 document.getElementById('timerStatus').textContent = 'Voting in progress';
-            } else if (timeLeft > 0) {
+            } else if (data.time_remaining > 0) {
                 document.getElementById('timerStatus').textContent = 'Final minutes to vote';
             } else {
-                document.getElementById('timerStatus').textContent = 'Executing winning action...';
+                document.getElementById('timerStatus').textContent = 'Executing action...';
             }
 
-            if (timeLeft > 0) {
-                timeLeft--;
-            } else {
-                executeVote();
-                resetCycle();
+            // Treasury
+            document.getElementById('treasuryAmount').textContent = data.treasury || '0 SOL';
+            
+            // Stats
+            const totalVotes = (data.votes_burn || 0) + (data.votes_buyback || 0) + 
+                             (data.votes_distribute || 0) + (data.votes_hold || 0);
+            document.getElementById('totalVotes').textContent = totalVotes;
+            document.getElementById('totalCycles').textContent = data.current_cycle || 0;
+            document.getElementById('claimedFees').textContent = data.claimed_fees || '0 SOL';
+
+            // Votes
+            updateVoteDisplay(data);
+
+            // Last execution
+            if (data.last_action && data.last_tx && data.last_tx !== 'N/A') {
+                addTransactionToLog(data.last_action, data.last_amount, data.last_tx);
             }
         }
 
-        function resetCycle() {
-            timeLeft = 600;
-            hasVoted = false;
-            selectedOption = null;
+        function updateVoteDisplay(data) {
+            const votes = {
+                burn: data.votes_burn || 0,
+                buyback: data.votes_buyback || 0,
+                distribute: data.votes_distribute || 0,
+                hold: data.votes_hold || 0
+            };
+
+            const total = Object.values(votes).reduce((a, b) => a + b, 0);
             
-            document.querySelectorAll('.vote-option').forEach(opt => {
-                opt.classList.remove('selected');
+            // Clear winning states
+            document.querySelectorAll('.vote-option').forEach(opt => opt.classList.remove('winning'));
+
+            let maxVotes = 0;
+            let winner = null;
+
+            Object.entries(votes).forEach(([option, count]) => {
+                const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+                
+                document.getElementById(`percent-${option}`).textContent = `${percent}%`;
+                document.getElementById(`progress-${option}`).style.width = `${percent}%`;
+
+                if (count > maxVotes) {
+                    maxVotes = count;
+                    winner = option;
+                }
             });
-            
-            updateVoteButton();
-            voteCount = { burn: 0, buyback: 0, distribute: 0, hold: 0 };
-            updateVotePercentages();
+
+            // Mark winner
+            if (winner && total > 0) {
+                document.querySelector(`[data-option="${winner}"]`).classList.add('winning');
+            }
         }
 
-        // Connect to Phantom Wallet
+        function addTransactionToLog(action, amount, txHash) {
+            const logContainer = document.getElementById('transactionLog');
+            
+            // Remove empty state if present
+            const emptyState = logContainer.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            // Check if already exists
+            const existing = Array.from(logContainer.querySelectorAll('.log-entry'))
+                .find(entry => entry.dataset.tx === txHash);
+            
+            if (existing) return; // Don't add duplicates
+
+            const actionLabels = {
+                burn: { label: 'BURN', title: 'Token Burn Executed' },
+                buyback: { label: 'BUY', title: 'Buyback Executed' },
+                distribute: { label: 'DIST', title: 'Distribution Executed' },
+                hold: { label: 'HOLD', title: 'Treasury Accumulated' }
+            };
+
+            const info = actionLabels[action] || { label: 'ACT', title: 'Action Executed' };
+
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.dataset.tx = txHash;
+            entry.innerHTML = `
+                <div class="log-info">
+                    <div class="log-icon">${info.label}</div>
+                    <div class="log-details">
+                        <h4>${info.title}</h4>
+                        <p>Tx: ${txHash.substring(0, 4)}...${txHash.substring(txHash.length - 4)}</p>
+                    </div>
+                </div>
+                <div class="log-amount">
+                    <div class="amount">${amount}</div>
+                    <div class="time">Just now</div>
+                </div>
+            `;
+
+            logContainer.insertBefore(entry, logContainer.firstChild);
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // WALLET CONNECTION
+        // ═══════════════════════════════════════════════════════════
+        
         async function connectWallet() {
             const btn = document.getElementById('walletBtn');
             
@@ -834,7 +934,10 @@
             }
         }
 
-        // Vote selection
+        // ═══════════════════════════════════════════════════════════
+        // VOTING
+        // ═══════════════════════════════════════════════════════════
+        
         function selectVote(option) {
             if (!walletConnected || hasVoted) return;
 
@@ -849,7 +952,6 @@
             updateVoteButton();
         }
 
-        // Submit vote
         async function submitVote() {
             if (!selectedOption || hasVoted || !walletConnected) return;
 
@@ -857,17 +959,37 @@
             btn.innerHTML = '<span class="loading"></span> Recording vote...';
             btn.disabled = true;
 
-            setTimeout(() => {
+            try {
+                // Get current votes
+                const { data: currentData } = await supabase
+                    .from('bot_state')
+                    .select('*')
+                    .eq('id', 1)
+                    .single();
+
+                // Increment the selected vote
+                const voteField = `votes_${selectedOption}`;
+                const newVoteCount = (currentData[voteField] || 0) + 1;
+
+                // Update Supabase
+                const { error } = await supabase
+                    .from('bot_state')
+                    .update({ [voteField]: newVoteCount })
+                    .eq('id', 1);
+
+                if (error) throw error;
+
                 hasVoted = true;
-                voteCount[selectedOption]++;
-                
-                updateVotePercentages();
                 showNotification('Vote recorded successfully');
                 updateVoteButton();
-            }, 2000);
+
+            } catch (error) {
+                console.error('Error voting:', error);
+                showNotification('Failed to vote. Try again.');
+                btn.disabled = false;
+            }
         }
 
-        // Update vote button state
         function updateVoteButton() {
             const btn = document.getElementById('voteBtn');
             
@@ -886,116 +1008,10 @@
             }
         }
 
-        // Update vote percentages
-        function updateVotePercentages() {
-            const total = Object.values(voteCount).reduce((a, b) => a + b, 0);
-            
-            if (total === 0) {
-                Object.keys(voteCount).forEach(key => {
-                    const element = document.querySelector(`[data-option="${key}"]`);
-                    element.querySelector('.vote-percentage').textContent = '0%';
-                    element.querySelector('.vote-progress').style.width = '0%';
-                    element.classList.remove('winning');
-                });
-                return;
-            }
-
-            let maxVotes = 0;
-            let winningOption = null;
-
-            Object.keys(voteCount).forEach(key => {
-                const votes = voteCount[key];
-                const percent = Math.round((votes / total) * 100);
-                const element = document.querySelector(`[data-option="${key}"]`);
-                
-                element.querySelector('.vote-percentage').textContent = `${percent}%`;
-                element.querySelector('.vote-progress').style.width = `${percent}%`;
-                element.classList.remove('winning');
-
-                if (votes > maxVotes) {
-                    maxVotes = votes;
-                    winningOption = key;
-                }
-            });
-
-            if (winningOption) {
-                const winElement = document.querySelector(`[data-option="${winningOption}"]`);
-                winElement.classList.add('winning');
-            }
-        }
-
-        // Execute winning vote action
-        function executeVote() {
-            const total = Object.values(voteCount).reduce((a, b) => a + b, 0);
-            if (total === 0) return;
-
-            let maxVotes = 0;
-            let winningOption = null;
-            Object.keys(voteCount).forEach(key => {
-                if (voteCount[key] > maxVotes) {
-                    maxVotes = voteCount[key];
-                    winningOption = key;
-                }
-            });
-
-            if (!winningOption) return;
-
-            showNotification(`Executing ${winningOption.toUpperCase()}`);
-            addTransaction(winningOption);
-        }
-
-        // Add transaction to log
-        function addTransaction(action) {
-            const logContainer = document.getElementById('transactionLog');
-            
-            if (logContainer.querySelector('.empty-state')) {
-                logContainer.innerHTML = '';
-            }
-
-            const actionMap = {
-                burn: { label: 'BURN', title: 'Token Burn Executed' },
-                buyback: { label: 'BUY', title: 'Buyback Executed' },
-                distribute: { label: 'DIST', title: 'Distribution Executed' },
-                hold: { label: 'HOLD', title: 'Treasury Accumulated' }
-            };
-
-            const info = actionMap[action];
-            const txHash = generateTxHash();
-            
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            entry.innerHTML = `
-                <div class="log-info">
-                    <div class="log-icon">${info.label}</div>
-                    <div class="log-details">
-                        <h4>${info.title}</h4>
-                        <p>Tx: ${txHash}</p>
-                    </div>
-                </div>
-                <div class="log-amount">
-                    <div class="amount">-- SOL</div>
-                    <div class="time">Just now</div>
-                </div>
-            `;
-            
-            logContainer.insertBefore(entry, logContainer.firstChild);
-        }
-
-        // Generate transaction hash
-        function generateTxHash() {
-            const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-            let hash = '';
-            for (let i = 0; i < 4; i++) {
-                hash += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            hash += '...';
-            for (let i = 0; i < 4; i++) {
-                hash += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return hash;
-        }
-
-        // Show notification
+        // ═══════════════════════════════════════════════════════════
+        // UTILITIES
+        // ═══════════════════════════════════════════════════════════
+        
         function showNotification(message) {
             const notification = document.getElementById('notification');
             notification.innerHTML = `<strong>${message}</strong>`;
@@ -1006,12 +1022,36 @@
             }, 3000);
         }
 
-        // Check Phantom on load
+        // ═══════════════════════════════════════════════════════════
+        // INITIALIZE
+        // ═══════════════════════════════════════════════════════════
+        
         window.addEventListener('load', () => {
-            if (window.solana && window.solana.isPhantom) {
-                console.log('Phantom wallet detected');
-            }
+            loadInitialState();
+            console.log('🚀 CLAU Platform loaded and synced with Supabase');
         });
+
+        // Reset hasVoted when timer resets (new cycle)
+        let lastCycle = 0;
+        setInterval(async () => {
+            const { data } = await supabase
+                .from('bot_state')
+                .select('current_cycle')
+                .eq('id', 1)
+                .single();
+
+            if (data && data.current_cycle > lastCycle) {
+                lastCycle = data.current_cycle;
+                hasVoted = false;
+                updateVoteButton();
+                
+                // Clear vote selection
+                document.querySelectorAll('.vote-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                selectedOption = null;
+            }
+        }, 2000);
     </script>
 </body>
 </html>
